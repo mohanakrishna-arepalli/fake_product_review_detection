@@ -1,2 +1,25 @@
+# Compiled source
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.env
+venv
+*.egg-info
 fakeenv
-__pycache__
+
+# Byte code
+__pycache__/
+
+# OS or other files
+.DS_Store
+*.log
+*.swp
+*.swo
+
+# ML files
+fake_review_predictor.ipynb
+
+# Datasets
+fake reviews dataset.csv
