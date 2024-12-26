@@ -11,3 +11,5 @@ pydantic
 fastapi
 uvicorn
 gunicorn==19.9.0
+
+python-multipart

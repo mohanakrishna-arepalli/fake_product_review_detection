@@ -1,6 +1,6 @@
 # Library imports
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 import joblib
 import nltk  # Natural Language Toolkit
 from nltk.corpus import stopwords  # For removing stopwords
@@ -8,6 +8,8 @@ from nltk.stem import WordNetLemmatizer  # For lemmatizing words
 import tensorflow as tf
 from tensorflow.keras.models import load_model  # For loading the LSTM model
 from config import Review
+import pandas as pd
+import io
 
 # Download NLTK data files (if not already downloaded)
 nltk.download('stopwords')
@@ -86,6 +88,60 @@ def predict(review: Review):
         raise HTTPException(
             status_code=500,
             detail=f"Error processing review: {str(e)}"
+        )
+
+
+@app.post("/process-reviews")
+async def process_reviews_csv(file: UploadFile = File(...)):
+    """
+    Process a CSV file containing product reviews and filter out fake reviews.
+    CSV must have columns: 'product_id' and 'review'
+    """
+    try:
+        # Read CSV content
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+        
+        # Validate CSV structure
+        if not all(col in df.columns for col in ['productId', 'review']):
+            raise HTTPException(
+                status_code=400,
+                detail="CSV must contain 'product_id' and 'review' columns"
+            )
+        
+        # Process each review
+        results = []
+        for _, row in df.iterrows():
+            # Clean and preprocess the review
+            clean_review = clean_text(row['review'])
+            review_sequence = tokenizer.texts_to_sequences([clean_review])
+            review_padded = tf.keras.preprocessing.sequence.pad_sequences(
+                review_sequence,
+                maxlen=100,  # Make sure this matches your model's input size
+                padding='post'
+            )
+            
+            # Get prediction
+            prediction = float(model.predict(review_padded)[0][0])
+            
+            # If review is predicted as real (prediction <= 0.5)
+            if prediction <= 0.5:
+                results.append({
+                    'productId': row['productId'],
+                    'review': row['review'],
+                    'confidence': round((1 - prediction) * 100, 2)
+                })
+        
+        return {
+            'real_reviews': results,
+            'total_reviews': len(df),
+            'real_reviews_count': len(results)
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing CSV file: {str(e)}"
         )
 
 if __name__ == '__main__':
