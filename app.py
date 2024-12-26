@@ -86,63 +86,7 @@ def predict(review: Review):
             status_code=500,
             detail=f"Error processing review: {str(e)}"
         )
-
-
-# async def process_reviews_csv(file: UploadFile = File(...)):
-    # logging.debug("Process reviews CSV endpoint called")
-    # try:
-    #     # Read CSV content
-    #     content = await file.read()
-    #     df = pd.read_csv(io.StringIO(content.decode('utf-8')))
-    #     logging.debug("CSV content read into DataFrame")
-        
-    #     # Validate CSV structure
-    #     if not all(col in df.columns for col in ['productId', 'review']):
-    #         logging.error("CSV must contain 'product_id' and 'review' columns")
-    #         raise HTTPException(
-    #             status_code=400,
-    #             detail="CSV must contain 'product_id' and 'review' columns"
-    #         )
-        
-    #     # Process each review
-    #     results = []
-    #     for _, row in df.iterrows():
-    #         logging.debug(f"Processing review for product ID: {row['productId']}")
-    #         clean_review = clean_text(row['review'])
-    #         review_sequence = tokenizer.texts_to_sequences([clean_review])
-    #         review_padded = tf.keras.preprocessing.sequence.pad_sequences(
-    #             review_sequence,
-    #             maxlen=100,  # Make sure this matches your model's input size
-    #             padding='post'
-    #         )
-    #         logging.debug(f"Padded review sequence: {review_padded}")
-            
-    #         # Get prediction
-    #         prediction = float(model.predict(review_padded)[0][0])
-    #         logging.debug(f"Prediction: {prediction}")
-            
-    #         # If review is predicted as real (prediction <= 0.5)
-    #         if prediction <= 0.5:
-    #             results.append({
-    #                 'productId': row['productId'],
-    #                 'review': row['review'],
-    #                 'confidence': round((1 - prediction) * 100, 2)
-    #             })
-        
-    #     logging.debug(f"Total reviews processed: {len(df)}, Real reviews count: {len(results)}")
-    #     return {
-    #         'real_reviews': results,
-    #         'total_reviews': len(df),
-    #         'real_reviews_count': len(results)
-    #     }
-        
-    # except Exception as e:
-    #     logging.error(f"Error processing CSV file: {str(e)}")
-    #     raise HTTPException(
-    #         status_code=500,
-    #         detail=f"Error processing CSV file: {str(e)}"
-    #     )
-
+    
 @app.post("/process-reviews")
 async def process_reviews_csv(file: UploadFile = File(...)):
     logging.debug("Process reviews CSV endpoint called")

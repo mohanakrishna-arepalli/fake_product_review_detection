@@ -1,6 +1,21 @@
-runtime: python311
-entrypoint: gunicorn -b :8080 app:app --worker-class uvicorn.workers.UvicornWorker
-instance_class: F2
+runtime: python39 # Specify the Python runtime version
+entrypoint: uvicorn app:app --host 0.0.0.0 --port $PORT # Entry point for the application
+
+# Instance settings
+instance_class: F4 # Adjust based on your application's requirements (F2 is cost-effective)
+
+# Automatic scaling
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  target_throughput_utilization: 0.60
+  min_instances: 1
+  max_instances: 5
+
+# Dependencies
+# Dependencies should be listed in the `requirements.txt` file
+runtime_config:
+  python_version: 3.10.16
+
 handlers:
   - url: /.*
     script: auto
