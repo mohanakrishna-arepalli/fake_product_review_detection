@@ -1,16 +1,6 @@
-runtime: python312 # Use Python 3.12
-env: flex
-entrypoint: uvicorn app:app --host 0.0.0.0 --port $PORT # Entry point for the application
-
-# Instance settings
-instance_class: F4 # Adjust based on your application's requirements (F2 is cost-effective)
-
-# Automatic scaling
-automatic_scaling:
-  min_num_instances: 1 # Minimum number of instances
-  max_num_instances: 5 # Maximum number of instances
-
-# Dependencies should be listed in the `requirements.txt` file
+runtime: python312
+entrypoint: uvicorn app:app --host 0.0.0.0 --port 8080
+instance_class: F2
 handlers:
   - url: /.*
     script: auto
