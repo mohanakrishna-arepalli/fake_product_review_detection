@@ -1,0 +1,8 @@
+runtime: python311
+entrypoint: gunicorn -b :8080 app:app
+
+instance_class: F2
+
+handlers:
+  - url: /.*
+    script: auto
